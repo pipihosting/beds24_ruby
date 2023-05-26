@@ -1,5 +1,4 @@
 require "net/http"
-require "debug"
 
 module Beds24
   class Authentication < Client
