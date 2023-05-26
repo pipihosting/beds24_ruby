@@ -13,8 +13,8 @@ module Beds24
       get("bookings/messages", {roomId: room_ids, maxAge: max_age}, {token: @token})
     end
 
-    def messages(max_age = 2)
-      get("bookings/messages", {maxAge: max_age}, {token: @token})
+    def messages(max_age = 2, message_source = "guest")
+      get("bookings/messages", {maxAge: max_age, messageSource: message_source}, {token: @token})
     end
 
     # Send messages to a booking
