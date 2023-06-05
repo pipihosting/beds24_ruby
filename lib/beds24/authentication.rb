@@ -8,17 +8,17 @@ module Beds24
     end
 
     # Get an authentication token using a refresh token
-    def token(refresh_token)
+    def token(refresh_token = @refresh_token)
       get("authentication/token", {}, {refreshToken: refresh_token})
     end
 
     # Delete a refresh token
-    def delete(refresh_token)
+    def delete(refresh_token = @refresh_token)
       # TODO
     end
 
     # Get information about a token and diagnostics
-    def details(token)
+    def details(token = @token)
       get("authentication/details", {token: token})
     end
   end

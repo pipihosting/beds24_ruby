@@ -1,6 +1,6 @@
 RSpec.describe Beds24::Messages do
   let(:token) { "my_token" }
-  subject(:messages) { Beds24::Messages.new(token) }
+  subject(:messages) { Beds24::Messages.new(token, "my_refresh_token") }
 
   describe "#messages_by_room_ids" do
     before do

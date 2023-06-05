@@ -1,7 +1,7 @@
 RSpec.describe Beds24::Authentication do
   let(:code) { "my_code" }
   let(:device_name) { "my_device" }
-  subject(:authentication) { Beds24::Authentication.new }
+  subject(:authentication) { Beds24::Authentication.new("my_token", "my_refresh_token") }
 
   describe "#setup" do
     before do

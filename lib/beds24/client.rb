@@ -3,6 +3,10 @@ require "json"
 module Beds24
   class Client
     BASE_URL = "https://beds24.com/api/v2"
+    def initialize(token, refresh_token)
+      @token = token
+      @refresh_token = refresh_token
+    end
 
     def get(uri, params = {}, headers = {})
       uri = URI("#{BASE_URL}/#{uri}")
@@ -11,7 +15,7 @@ module Beds24
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
 
-      request = Net::HTTP::Get.new(uri.request_uri, headers.merge("Content-Type" => "application/json"))
+      request = Net::HTTP::Get.new(uri.request_uri, headers.merge("Content-Type" => "application/json", "token" => @token))
 
       response = http.request(request)
 
@@ -33,7 +37,7 @@ module Beds24
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
 
-      request = Net::HTTP::Post.new(uri.request_uri, headers.merge("Content-Type" => "application/json"))
+      request = Net::HTTP::Post.new(uri.request_uri, headers.merge("Content-Type" => "application/json", "token" => @token))
       request.body = body
 
       response = http.request(request)
