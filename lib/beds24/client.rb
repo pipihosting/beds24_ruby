@@ -1,4 +1,5 @@
 require "json"
+require "faraday"
 
 module Beds24
   class Client
@@ -8,50 +9,68 @@ module Beds24
       @refresh_token = refresh_token
     end
 
-    def get(uri, params = {}, headers = {})
-      uri = URI("#{BASE_URL}/#{uri}")
-      uri.query = URI.encode_www_form(params)
+    def get(path, params = {}, headers = {}, with_token = true)
+      to_json(conn.get(uri(path: path)) do |req|
+        req.headers = with_token ? headers_with_token.merge(headers) : headers
+        req.params = params
+      end&.body)
+    end
 
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
+    def post(path, body, headers = {})
+      body = conn.post(uri(path: path)) do |req|
+        req.headers = headers.merge("Content-Type" => "application/json", "token" => @token)
+        req.body = body.to_json
+      end&.body
 
-      request = Net::HTTP::Get.new(uri.request_uri, headers.merge("Content-Type" => "application/json", "token" => @token))
+      to_json(body)
+    end
 
-      response = http.request(request)
+    private
 
-      case response
-      when Net::HTTPSuccess
-        JSON.parse response.body
-      when Net::HTTPBadRequest
-        raise "Bad request #{response.body}"
-      when Net::HTTPUnauthorized
-        raise "Unauthorized #{response.body}"
+    def headers_with_token
+      {
+        "Content-Type" => "application/json",
+        "token" => @token
+      }
+    end
+
+    def to_json(body)
+      return unless body
+      data = JSON.parse(body)
+
+      # if json is a array
+      if data.is_a?(Array)
+        return process_json_array(data)
+      end
+
+      code = data["code"]
+
+      if code == 401
+        raise Beds24::Unauthorized.new(data["error"])
+      elsif code == 400
+        raise Beds24::BadRequest.new(data["error"])
+      elsif data["success"] != false
+        data
       else
-        raise "Unexpected response #{response}, #{response.body}"
+        raise Beds24::Error.new(data["error"])
       end
     end
 
-    def post(uri, body, headers = {})
-      uri = URI("#{BASE_URL}/#{uri}")
-
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl = true
-
-      request = Net::HTTP::Post.new(uri.request_uri, headers.merge("Content-Type" => "application/json", "token" => @token))
-      request.body = body
-
-      response = http.request(request)
-
-      case response
-      when Net::HTTPSuccess
-        JSON.parse response.body
-      when Net::HTTPBadRequest
-        raise "Bad request #{response.body}"
-      when Net::HTTPUnauthorized
-        raise "Unauthorized #{response.body}"
-      else
-        raise "Unexpected response #{response}, #{response.body}"
+    def process_json_array(data)
+      if data.is_a?(Array) && data.size == 1
+        data = data.first
       end
+      data
+    end
+
+    def conn
+      ::Faraday.new do |f|
+        f.options[:timeout] = 10
+      end
+    end
+
+    def uri(path:)
+      "#{BASE_URL}/#{path}"
     end
   end
 end

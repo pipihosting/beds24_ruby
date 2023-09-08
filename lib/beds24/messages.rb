@@ -2,11 +2,11 @@ module Beds24
   class Messages < Client
     # Get messages
     # params:
-    #   room_ids: array of room ids
+    #   room_id: The id of the room to return messages for.
     #   max_age: The maximum age (in days) of messages to return.
     #            If set to 3, messages from more than 3 days ago will not be included.
-    def messages_by_room_ids(room_ids, max_age = 2)
-      get("bookings/messages", {roomId: room_ids, maxAge: max_age})
+    def messages_by_room_id(room_id, max_age = 2)
+      get("bookings/messages", {roomId: room_id, maxAge: max_age})
     end
 
     # Get messages

@@ -8,7 +8,6 @@ RSpec.describe Beds24::Authentication do
       stub_request(:get, "https://beds24.com/api/v2/authentication/setup")
         .with(
           headers: {
-            "Content-Type" => "application/json",
             "code" => code,
             "deviceName" => device_name
           }
@@ -22,14 +21,14 @@ RSpec.describe Beds24::Authentication do
     end
 
     context "when the response is not successful" do
-      let(:body) { '{ "success": false, "type": "error", "code": 400, "error": "string" }' }
+      let(:body) { '{ "success": false, "type": "error", "code": 400, "error": "Unsuccesful operation" }' }
       before do
         stub_request(:get, "https://beds24.com/api/v2/authentication/setup")
           .to_return(status: 400, body: body)
       end
 
       it "raises an error" do
-        expect { authentication.setup(code, device_name) }.to raise_error("Bad request #{body}")
+        expect { authentication.setup(code, device_name) }.to raise_error(Beds24::BadRequest, "Unsuccesful operation")
       end
     end
   end
@@ -39,7 +38,6 @@ RSpec.describe Beds24::Authentication do
       stub_request(:get, "https://beds24.com/api/v2/authentication/token")
         .with(
           headers: {
-            "Content-Type" => "application/json",
             "refreshToken" => "my_refresh_token"
           }
         )
@@ -59,8 +57,7 @@ RSpec.describe Beds24::Authentication do
       end
 
       it "raises an error" do
-        expect { authentication.token("my_refresh_token") }
-          .to raise_error("Bad request #{body}")
+        expect { authentication.token("my_refresh_token") }.to raise_error(Beds24::BadRequest, "string")
       end
     end
   end

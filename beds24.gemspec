@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["iuhoay"]
   spec.email = ["iuhoay@gmail.com"]
 
-  spec.summary = "Ruby wapper for Beds24 API."
-  spec.description = "Ruby wapper for Beds24 API."
+  spec.summary = "Ruby wrapper for Beds24 API."
+  spec.description = "Ruby wrapper for Beds24 API."
   spec.homepage = "https://github.com/pipihosting/beds24"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
@@ -33,10 +33,12 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   # spec.add_dependency "example-gem", "~> 1.0"
+  spec.add_dependency "faraday"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "webmock"
   spec.add_development_dependency "debug"
   spec.add_development_dependency "standard"
+  spec.add_development_dependency "pry"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

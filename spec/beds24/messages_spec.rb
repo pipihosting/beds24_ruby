@@ -2,7 +2,7 @@ RSpec.describe Beds24::Messages do
   let(:token) { "my_token" }
   subject(:messages) { Beds24::Messages.new(token, "my_refresh_token") }
 
-  describe "#messages_by_room_ids" do
+  describe "#messages_by_room_id" do
     before do
       # json response
       json = {
@@ -30,30 +30,32 @@ RSpec.describe Beds24::Messages do
         ]
       }
 
-      stub_request(:get, "https://beds24.com/api/v2/bookings/messages?roomId=1&roomId=2&roomId=3&maxAge=2")
+      stub_request(:get, "https://beds24.com/api/v2/bookings/messages?roomId=1&maxAge=2")
         .with(
           headers: {
             "Content-Type" => "application/json",
             "token" => "my_token"
           }
-        )
-        .to_return(status: 200, body: json.to_json, headers: {})
+        ).to_return(status: 200, body: json.to_json, headers: {})
     end
 
     it "returns a parsed JSON response" do
-      response = messages.messages_by_room_ids([1, 2, 3])
+      response = messages.messages_by_room_id(1)
       expect(response["success"]).to eq(true)
     end
 
     context "when return Unauthorized" do
       let(:body) { '{ "success": false, "code": 401, "error": "Token is missing" }' }
       before do
-        stub_request(:get, "https://beds24.com/api/v2/bookings/messages?roomId=1&roomId=2&roomId=3&maxAge=2")
+        stub_request(:get, "https://beds24.com/api/v2/bookings/messages?roomId=1&maxAge=2")
+          .with(headers: {
+            "Content-Type" => "application/json"
+          })
           .to_return(status: 401, body: body)
       end
 
       it "raises an error" do
-        expect { messages.messages_by_room_ids([1, 2, 3]) }.to raise_error("Unauthorized #{body}")
+        expect { messages.messages_by_room_id(1) }.to raise_error(Beds24::Unauthorized)
       end
     end
   end
@@ -72,11 +74,11 @@ RSpec.describe Beds24::Messages do
             "token" => token
           }
         )
-        .to_return(status: 200, body: '[{"success": true}]', headers: {})
+        .to_return(status: 200, body: "[{\"success\": true}]", headers: {})
     end
 
     it "returns a parsed JSON response" do
-      expect(send_message.first["success"]).to eq(true)
+      expect(send_message["success"]).to eq(true)
     end
   end
 end
