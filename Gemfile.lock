@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    beds24 (0.1.0)
+    beds24 (0.2.0)
       faraday
 
 GEM
@@ -90,6 +90,7 @@ GEM
       hashdiff (>= 0.4.0, < 2.0.0)
 
 PLATFORMS
+  ruby
   x86_64-linux
 
 DEPENDENCIES
