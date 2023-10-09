@@ -9,6 +9,7 @@ module Beds24
       get("bookings/messages", {roomId: room_id, maxAge: max_age})
     end
 
+    # DEPRECATED: use fetch_messages instead
     # Get messages
     # params:
     #  max_age: The maximum age (in days) of messages to return.
@@ -17,12 +18,21 @@ module Beds24
       get("bookings/messages", {maxAge: max_age, source: source})
     end
 
+    def fetch_messages(options = {})
+      get("bookings/messages", options)
+    end
+
     # Send messages to a booking
     # params:
     #   booking_id: booking id
     #   message: message to send
     def send_message(booking_id, message)
       post("bookings/messages", [{bookingId: booking_id, message: message}])
+    end
+
+    def mark_read(*message_ids)
+      return [] if message_ids.empty?
+      post("bookings/messages", message_ids.map { |id| {id: id, read: true} })
     end
   end
 end

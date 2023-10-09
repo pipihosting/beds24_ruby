@@ -81,4 +81,33 @@ RSpec.describe Beds24::Messages do
       expect(send_message["success"]).to eq(true)
     end
   end
+
+  describe "#mark_read" do
+    let(:message_ids) { [123, 456] }
+    subject(:mark_read) { messages.mark_read(*message_ids) }
+
+    before do
+      stub_request(:post, "https://beds24.com/api/v2/bookings/messages")
+        .with(
+          body: message_ids.map { |id| {id: id, read: true} },
+          headers: {
+            "Content-Type" => "application/json",
+            "token" => token
+          }
+        )
+        .to_return(status: 200, body: "[{\"success\": true},{\"success\": true}]", headers: {})
+    end
+
+    it "returns a parsed JSON response" do
+      expect(mark_read).to eq([{"success" => true}, {"success" => true}])
+    end
+
+    context "params is empty" do
+      subject(:mark_read) { messages.mark_read }
+
+      it "returns an empty array" do
+        expect(mark_read).to eq([])
+      end
+    end
+  end
 end
