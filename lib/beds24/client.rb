@@ -12,7 +12,7 @@ module Beds24
     def get(path, params = {}, headers = {}, with_token = true)
       to_json(conn.get(uri(path: path)) do |req|
         req.headers = with_token ? headers_with_token.merge(headers) : headers
-        req.params = params
+        req.params = flatten_params(params)
       end&.body)
     end
 
@@ -64,13 +64,27 @@ module Beds24
     end
 
     def conn
-      ::Faraday.new do |f|
+      ::Faraday.new(request: { params_encoder: Faraday::FlatParamsEncoder }) do |f|
         f.options[:timeout] = 10
+        f.request :url_encoded
       end
     end
 
     def uri(path:)
       "#{BASE_URL}/#{path}"
+    end
+
+    def flatten_params(params)
+      params.each_with_object({}) do |(key, value), result|
+        if value.is_a?(Array)
+          value.each do |v|
+            result[key] ||= []
+            result[key] << v
+          end
+        else
+          result[key] = value
+        end
+      end
     end
   end
 end
